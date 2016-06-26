@@ -1,0 +1,92 @@
+#!/bin/bash
+function update {
+sudo apt-get update
+sudo apt-get install unzip
+sudo apt-get install php5-mysqlnd-ms
+sudo apt-get install xdg-utils
+sudo apt-get install php5-cli
+}
+function hello {
+
+ if  [ ! -x /usr/sbin/nginx ]; then
+     echo "Nginx not installed"
+     sudo apt-get install nginx
+   else
+     echo "nginx already installed"
+     sleep 2
+ fi
+   # echo "nginx already installed" | mail -s "Email Subject" modassir@mobisy.com
+    if [ ! -x /usr/sbin/mysqld ]; then
+       echo "mysql not installed"
+       sudo apt-get install mysql-server
+ else
+          echo "mysql already installed"
+#use username-root and password-root for mysql server
+          sleep 2
+     fi
+              if [ ! -x /usr/sbin/php5-fpm ]; then
+
+                             echo "php5-fpm not installed"
+                            sudo apt-get install php5-fpm
+
+                             else
+                              echo "php5-fpm already installed"
+                  fi
+echo -e "Enter domain name:-"
+ read domain
+ echo "the domain you entered is: $domain"
+
+echo "127.0.0.1 $domain" >> /etc/hosts
+
+}
+function WpCli {
+wget https://raw.github.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+mkdir -p /var/www/$domain
+chmod 777 /var/www/$domain
+mv wp-cli.phar /var/www/$domain/wp
+
+cd /var/www/$domain; php wp core download --allow-root; cd
+cd /var/www/$domain; php wp core config --dbname=''$domain'_db' --dbuser="root" --dbpass="root" --allow-root; cd
+sleep 3
+cd /var/www/$domain; php wp db create --allow-root; cd
+cd /var/www/$domain; php wp core install --url="example.com" --title="HAIDER" --admin_user="modassir" --admin_password="modassir" --admin_email="modassir.haider@gmail.com" --allow-root; cd
+}
+
+function php5 {
+sed -i 's#listen = /var/run/php5-fpm.sock#listen = 127.0.0.1:9000#g' /etc/php5/fpm/pool.d/www.conf
+sudo service php5-fpm restart
+sleep 3
+}
+function nginx {
+
+sleep 2
+
+rm /etc/nginx/sites-enabled/*
+echo "server {" >> /etc/nginx/sites-enabled/$domain
+echo "listen 80;" >> /etc/nginx/sites-enabled/$domain
+echo "root /var/www/$domain;" >> /etc/nginx/sites-enabled/$domain
+echo "index index.html index.htm index.php;" >> /etc/nginx/sites-enabled/$domain
+echo "server_name $domain;" >> /etc/nginx/sites-enabled/$domain
+
+echo "location ~ \.php$ {" >> /etc/nginx/sites-enabled/$domain
+echo "root /var/www/$domain;" >> /etc/nginx/sites-enabled/$domain
+echo "fastcgi_pass 127.0.0.1:9000;" >> /etc/nginx/sites-enabled/$domain
+echo "fastcgi_param   SCRIPT_FILENAME  /var/www/$domain$fastcgi_script_name;" >> /etc/nginx/sites-enabled/$domain
+echo "fastcgi_index index.php;" >> /etc/nginx/sites-enabled/$domain
+echo "include /etc/nginx/fastcgi_params;" >> /etc/nginx/sites-enabled/$domain
+echo "}" >> /etc/nginx/sites-enabled/$domain
+echo "}" >> /etc/nginx/sites-enabled/$domain
+sleep 3
+sudo service nginx restart
+sudo service php5-fpm restart
+}
+
+update
+hello
+WpCli
+php5
+nginx
+
+#xdg-open $domain
+

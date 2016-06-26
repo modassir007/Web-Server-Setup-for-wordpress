@@ -7,17 +7,15 @@ Web Server Setup for WordPress on debian-ubuntu
 4. Create a /etc/hosts entry for example.com pointing to localhost IP.
 
 
-setup database in mysql
-=======
-Create a new database in mysql for new WordPress. (database name “example.com_db” )
-
-
-Setup wordpress 
+Setup wordpress using wp-cli
 ========
 1. The first thing in creating a virtual host is to a create a directory where we will keep the new website’s information.
 2. This location will be your Document Root in the nginx virtual configuration file later on.
+3. Download wp-cli and move it to the example.com directory.
+
+
 3. Download WordPress latest version and unzip it locally in example.com document root.
-4. Create wp-config.php with proper DB configuration. (You can use wp-config-sample.php as your template)
+4. Create wp-config.php,wp database and install wp using wp core install.
 5. We need to grant ownership of the directory to the right user, instead of just keeping it on the root system
 
 Changes in php5-fpm
